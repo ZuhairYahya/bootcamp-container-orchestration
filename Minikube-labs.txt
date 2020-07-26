@@ -1,0 +1,261 @@
+###### Container Orchestration ######
+
+Main references 
+https://minikube.sigs.k8s.io/docs/start/
+
+## Environment ##
+> 2 CPUs or more
+> 2GB of free memory
+> 20GB of free disk space
+> Internet connection
+> Container or virtual machine manager, such as: Docker, Hyperkit, Hyper-V, KVM, Parallels, Podman, VirtualBox, or VMWare
+
+###### Install Kubectl #######
+
+1. Install kubectl binary with curl on Linux
+
+curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.0/bin/linux/amd64/kubectl
+
+2. Make the kubectl binary executable
+
+chmod +x ./kubectl
+
+3. Move the binary in to your PATH
+
+sudo mv ./kubectl /usr/local/bin/kubectl
+
+4. Test to ensure the version you installed is up-to-date:
+
+kubectl version
+kubectl version --client
+kubectl get node
+
+
+######## Install Minikube ##########
+
+1. Install Minikube via direct download
+
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+
+2. Make the minikube binary executable
+
+chmod +x minikube
+
+3. Here's an easy way to add the Minikube executable to your path :
+
+sudo mkdir -p /usr/local/bin/
+sudo install minikube /usr/local/bin/
+
+**if you as a non-root user to running docker**
+
+1. If you don't have a docker group, you can add by :
+
+$ sudo groupadd docker
+
+2. If you don't have a user, please make it first
+
+$ sudo adduser $USER
+
+3. You can add users that have been created to the docker group
+
+$ sudo usermod -aG docker $USER
+
+4. Run the image without using sudo parameters
+
+$ docker run hello-world
+
+***Verify*** 
+
+minikube start
+minikube status
+
+
+########### Node ###############
+
+1. Show all node on kubernetes
+
+kubectl get node
+
+2. Show detail node on kubernetes
+
+kubectl get node *namenode*
+
+
+
+######### Pod ############
+
+1. Show all pod on kubernetes
+
+kubectl get pod
+
+2. Show detail pod on kubernetes
+
+kubectl get pod -o wide
+kubectl describe pod *namepod*
+
+
+
+########## Replica Set ############
+
+1. You can copy the code from the following template
+
+https://github.com/ZuhairYahya/bootcamp-container-orchestration
+
+2. Create Replica Set
+
+kubectl create -f **namefile.yaml**
+
+3.  Show Replica Set
+
+kubectl get rs
+
+4. Show pod
+
+kubectl get pod
+
+4. Delete pod on Replica Set
+
+kubectl delete pod **namepod**
+
+
+
+########## Sample Deploy NGINX ############
+
+1. Deploy applications nginx
+
+kubectl create deployment nginx --image nginx:latest 
+kubectl expose deployment nginx --type=NodePort --port=80
+
+2. It may take a moment, but your deployment will soon show up when you run:
+
+kubectl get services nginx
+
+3. The easiest way to access this service is to let minikube launch a web browser for you:
+
+minikube service --url nginx
+
+4. Then it will display
+
+http://172.17.0.3:31548
+
+5. Tunnel your local
+
+ssh -L 9999:172.17.0.3:31548 username@ippublic
+
+6. Open your browser
+
+localhost:9999
+
+
+
+################# Kubernetes Dashboard ################
+
+1. To access the Kubernetes Dashboard, run this command in a shell after starting Minikube to get the address:
+
+minikube dashboard
+
+2. Change type port kubernetes-dashboard to NodePort
+
+kubectl edit -n kubernetes-dashboard svc kubernetes-dashboard
+
+````````
+type: NodePort
+````````
+
+minikube service -n kubernetes-dashboard --url kubernetes-dashboard
+
+3. Then it will display
+
+http://172.17.0.3:32054
+
+4. Tunnel your local
+
+ssh -L 9991:172.17.0.3:32054 username@ippublic
+
+5. Open your browser
+
+localhost:9991
+
+
+
+########### Deploy Application Microservice Kaos Kaki #####################
+
+1. Run the following command
+
+kubectl create namespace sock-shop
+kubectl apply -n sock-shop -f "https://github.com/hamzahbd/nolsatu/blob/master/sockshop.yaml?raw=true"
+kubectl -n sock-shop get svc front-end
+kubectl -n sock-shop get pods
+
+2. Show containers running in real time
+
+watch kubectl get -n sock-shop pod -o wide
+
+3. Run the minikube service
+
+minikube service -n sock-shop --url front-end
+
+4. Then it will display
+
+http://172.17.0.3:30001
+
+5. Tunnel your local
+
+ssh -L 9992:172.17.0.3:30001 username@ippublic
+
+6. Open your browser
+
+localhost:9992
+
+
+
+################ Deploy Wordpress + DB ##############
+
+1. Use the following command to create the persistent volume directory for MariaDB and WordPress:
+
+sudo mkdir wordpress-data
+
+git clone https://github.com/ammarun11/minikube-wordpress.git
+
+cd minikube-wordpress
+
+ls 
+
+2. Open file kustomization.yaml
+
+````````````````````````````````
+resources:
+  - wordpressdb-deployment.yaml
+  - wordpress-deployment.yaml
+  - pv-mysql-wordpress.yaml
+  - pvc-mysql.yaml
+  - pvc-wordpress.yaml
+  - wordpress-svc.yaml
+  - wordpressdb-svc.yaml
+````````````````````````````````
+
+3. Please run 
+
+kubectl apply -k ./
+
+4. Run minikube tunnel
+
+minikube tunnel
+
+5. Show svc
+
+kubectl get svc
+
+6. Then it will display External-IP
+
+10.98.200.80
+
+7. Tunnel your local
+
+ssh -L 9993:10.98.200.80:80 username@ippublic
+
+8. Open your browser
+
+localhost:9993
+
+
